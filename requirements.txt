@@ -1,0 +1,67 @@
+# ========================================
+# MKG-LLM - Multimodal Knowledge Graph-Constrained Large Language Model
+# for Flight Departure Delay Multi-Task Prediction
+# Python: 3.10+, CUDA: 12.1
+# ========================================
+
+# --- Core Deep Learning Framework ---
+torch==2.5.1+cu121
+torchvision==0.20.1+cu121
+torchaudio==2.5.1+cu121
+
+# --- Graph Neural Network ---
+dgl==2.2.1+cu121
+# Note: DGL requires special installation command
+# pip install dgl==2.2.1+cu121 -f https://data.dgl.ai/wheels/torch-2.5/cu121/repo.html
+
+# --- Large Language Model & Fine-Tuning ---
+transformers==5.12.1
+peft==0.19.1
+accelerate==1.14.0
+bitsandbytes==0.49.2
+tokenizers==0.22.2
+safetensors==0.8.0
+
+# --- Data Processing ---
+numpy==1.26.4
+pandas==2.3.3
+scikit-learn==1.7.2
+scipy==1.15.3
+datasets==5.0.0
+pyarrow==24.0.0
+
+# --- Experiment Tracking & Visualization ---
+wandb==0.27.2
+tensorboard==2.20.0
+tensorboard-data-server==0.7.2
+
+# --- Web Framework (GUI) ---
+Flask==3.1.3
+Werkzeug==3.1.8
+Jinja2==3.1.6
+
+# --- Document Generation ---
+python-docx==1.2.0
+lxml==6.1.1
+
+# --- Utility Libraries ---
+tqdm==4.68.3
+pyyaml==6.0.3
+requests==2.34.2
+pillow==12.2.0
+sympy==1.13.1
+networkx==3.4.2
+joblib==1.5.3
+psutil==7.2.2
+
+# --- Other Dependencies ---
+huggingface_hub==1.20.1
+filelock==3.29.0
+fsspec==2026.4.0
+aiohttp==3.14.1
+httpx==0.28.1
+pydantic==2.13.4
+rich==15.0.0
+typer==0.25.1
+GitPython==3.1.50
+regex==2026.5.9
