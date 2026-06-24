@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flight Delay Prediction</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 15px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.3);
+            display: flex;
+            max-width: 1200px;
+            width: 100%;
+            overflow: hidden;
+        }
+        
+        .left-panel {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 25px;
+            width: 30%;
+            color: white;
+        }
+        
+        .right-panel {
+            padding: 25px;
+            width: 70%;
+            background: #f8f9fa;
+        }
+        
+        h2 {
+            color: white;
+            font-size: 22px;
+            margin-bottom: 20px;
+        }
+        
+        .input-group {
+            margin-bottom: 15px;
+        }
+        
+        .input-group label {
+            display: block;
+            font-size: 13px;
+            margin-bottom: 5px;
+            opacity: 0.9;
+        }
+        
+        .input-group input, .input-group select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 15px;
+        }
+        
+        .btn-predict {
+            width: 100%;
+            padding: 12px;
+            background: white;
+            color: #667eea;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        
+        .result-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .result-card h3 {
+            color: #667eea;
+            font-size: 16px;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+        
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .info-item {
+            background: #f8f9fa;
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .info-label {
+            font-size: 11px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+        
+        .info-value {
+            font-size: 14px;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .pred-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+        
+        .pred-item {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .pred-item.delayed {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+        }
+        
+        .pred-item.on-time {
+            background: linear-gradient(135deg, #27ae60 0%, #229954 100%);
+        }
+        
+        .pred-label {
+            font-size: 10px;
+            opacity: 0.9;
+            margin-bottom: 5px;
+        }
+        
+        .pred-value {
+            font-size: 18px;
+            font-weight: bold;
+        }
+        
+        .cause-section {
+            margin-top: 15px;
+        }
+        
+        .cause-item {
+            background: #fff9e6;
+            border-left: 3px solid #ffc107;
+            padding: 8px 12px;
+            margin-bottom: 8px;
+            border-radius: 4px;
+            font-size: 13px;
+        }
+        
+        .btn-truth {
+            width: 100%;
+            padding: 12px;
+            background: #27ae60;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        
+        .truth-section {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 15px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .truth-section h3 {
+            color: #27ae60;
+            font-size: 16px;
+            margin-bottom: 15px;
+        }
+        
+        .comparison {
+            background: #f8f9fa;
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 10px;
+        }
+        
+        .comparison-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 0;
+            font-size: 13px;
+        }
+        
+        .error-box {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            display: none;
+        }
+        
+        .loading-box {
+            text-align: center;
+            padding: 30px;
+            display: none;
+        }
+        
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .note {
+            text-align: center;
+            font-size: 11px;
+            color: #666;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="left-panel">
+            <h2>✈️ Flight Delay</h2>
+            
+            <div class="input-group">
+                <label>Year</label>
+                <input type="number" id="year" value="2025" min="2020" max="2030">
+            </div>
+            
+            <div class="input-group">
+                <label>Month</label>
+                <select id="month">
+                    <option value="1">January</option>
+                    <option value="2">February</option>
+                    <option value="3">March</option>
+                    <option value="4">April</option>
+                    <option value="5">May</option>
+                    <option value="6" selected>June</option>
+                    <option value="7">July</option>
+                    <option value="8">August</option>
+                    <option value="9">September</option>
+                    <option value="10">October</option>
+                    <option value="11">November</option>
+                    <option value="12">December</option>
+                </select>
+            </div>
+            
+            <div class="input-group">
+                <label>Day</label>
+                <input type="number" id="day" value="15" min="1" max="31">
+            </div>
+            
+            <div class="input-group">
+                <label>Flight</label>
+                <input type="text" id="flightNum" value="UA1234">
+            </div>
+            
+            <button class="btn-predict" onclick="predictDelay()">🔮 Predict</button>
+            
+            <div class="note">Try: UA1234 (Jun), OO4743 (Sep)</div>
+        </div>
+
+        <div class="right-panel">
+            <div class="error-box" id="errorBox"></div>
+            
+            <div class="loading-box" id="loadingBox">
+                <div class="spinner"></div>
+                <p>Loading...</p>
+            </div>
+
+            <div id="resultBox" style="display: none;">
+                <div class="result-card">
+                    <h3>📋 Flight Info</h3>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <div class="info-label">Flight</div>
+                            <div class="info-value" id="flightDisplay">-</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Route</div>
+                            <div class="info-value" id="routeDisplay">-</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Depart</div>
+                            <div class="info-value" id="depDisplay">-</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Arrive</div>
+                            <div class="info-value" id="arrDisplay">-</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="result-card" id="predCard">
+                    <h3>📊 Prediction</h3>
+                    <div class="pred-grid">
+                        <div class="pred-item">
+                            <div class="pred-label">Probability</div>
+                            <div class="pred-value" id="probDisplay">-</div>
+                        </div>
+                        <div class="pred-item">
+                            <div class="pred-label">Class</div>
+                            <div class="pred-value" id="classDisplay">-</div>
+                        </div>
+                        <div class="pred-item">
+                            <div class="pred-label">Delay</div>
+                            <div class="pred-value" id="delayDisplay">-</div>
+                        </div>
+                    </div>
+                    
+                    <div class="cause-section" id="causeSection">
+                        <div id="causeList"></div>
+                    </div>
+                </div>
+
+                <button class="btn-truth" onclick="showTruth()">👁️ Ground Truth</button>
+
+                <div class="truth-section" id="truthBox" style="display: none;">
+                    <h3>✅ Actual Status</h3>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <div class="info-label">Delay</div>
+                            <div class="info-value" id="actualDelay">-</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Class</div>
+                            <div class="info-value" id="actualClass">-</div>
+                        </div>
+                    </div>
+                    
+                    <div class="comparison">
+                        <div class="comparison-row">
+                            <span>Predicted:</span>
+                            <span id="cmpPred">-</span>
+                        </div>
+                        <div class="comparison-row">
+                            <span>Actual:</span>
+                            <span id="cmpAct">-</span>
+                        </div>
+                        <div class="comparison-row">
+                            <span>Error:</span>
+                            <span id="cmpError">-</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentData = null;
+        
+        async function predictDelay() {
+            const year = document.getElementById('year').value;
+            const month = document.getElementById('month').value;
+            const day = document.getElementById('day').value;
+            const flight = document.getElementById('flightNum').value;
+            
+            if (!year || !month || !day || !flight) {
+                showError('Fill all fields!');
+                return;
+            }
+            
+            hideError();
+            document.getElementById('loadingBox').style.display = 'block';
+            document.getElementById('resultBox').style.display = 'none';
+            document.getElementById('truthBox').style.display = 'none';
+            
+            try {
+                const response = await fetch('/predict', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        year: parseInt(year),
+                        month: parseInt(month),
+                        day: parseInt(day),
+                        flight_num: flight
+                    })
+                });
+                
+                if (!response.ok) {
+                    const err = await response.json();
+                    throw new Error(err.error || 'Error');
+                }
+                
+                const data = await response.json();
+                currentData = data;
+                displayResults(data);
+                
+            } catch (error) {
+                showError(error.message);
+            } finally {
+                document.getElementById('loadingBox').style.display = 'none';
+            }
+        }
+        
+        function displayResults(data) {
+            document.getElementById('resultBox').style.display = 'block';
+            
+            document.getElementById('flightDisplay').textContent = data.flight_number || '-';
+            document.getElementById('routeDisplay').textContent = (data.origin || '-') + ' → ' + (data.destination || '-');
+            document.getElementById('depDisplay').textContent = data.scheduled_dep || '-';
+            document.getElementById('arrDisplay').textContent = data.scheduled_arr || '-';
+            
+            const prob = ((data.delay_probability || 0) * 100).toFixed(1);
+            document.getElementById('probDisplay').textContent = prob + '%';
+            document.getElementById('classDisplay').textContent = data.delay_classification || '-';
+            document.getElementById('delayDisplay').textContent = (data.predicted_delay || 0).toFixed(1) + 'm';
+            
+            const predCard = document.getElementById('predCard');
+            const classItems = predCard.querySelectorAll('.pred-item');
+            classItems[1].className = 'pred-item ' + (data.delay_probability >= 0.5 ? 'delayed' : 'on-time');
+            
+            const causeList = document.getElementById('causeList');
+            if (data.root_causes && data.root_causes.length > 0) {
+                causeList.innerHTML = data.root_causes.map(c => 
+                    '<div class="cause-item">' + c + '</div>'
+                ).join('');
+            } else {
+                causeList.innerHTML = '<div class="cause-item">No delay factors</div>';
+            }
+        }
+        
+        function showTruth() {
+            if (!currentData) {
+                showError('Run prediction first!');
+                return;
+            }
+            
+            document.getElementById('truthBox').style.display = 'block';
+            
+            const actual = currentData.ground_truth?.delay_minutes || 0;
+            const isDelayed = currentData.ground_truth?.is_delayed || false;
+            
+            document.getElementById('actualDelay').textContent = actual.toFixed(1) + 'm';
+            document.getElementById('actualClass').textContent = isDelayed ? 'DELAYED' : 'ON-TIME';
+            
+            const pred = currentData.predicted_delay || 0;
+            document.getElementById('cmpPred').textContent = pred.toFixed(1) + 'm';
+            document.getElementById('cmpAct').textContent = actual.toFixed(1) + 'm';
+            document.getElementById('cmpError').textContent = Math.abs(pred - actual).toFixed(1) + 'm';
+        }
+        
+        function showError(msg) {
+            const box = document.getElementById('errorBox');
+            box.textContent = msg;
+            box.style.display = 'block';
+        }
+        
+        function hideError() {
+            document.getElementById('errorBox').style.display = 'none';
+        }
+    </script>
+</body>
+</html>
