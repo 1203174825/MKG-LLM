@@ -242,4 +242,4 @@ For questions, please contact the project maintainer.
 
 ---
 
-**Last Updated**: Junes 2026
+**Last Updated**: June 2026
